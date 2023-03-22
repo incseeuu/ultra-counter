@@ -1,22 +1,23 @@
 import React from 'react';
 import classes from "./Main.module.css";
 import UltraButton from "../UltraButton/UltraButton";
+import {useCounterSelector} from "../../bll/store";
+import {changeCurrentCountValue, CounterStateType, toggleSetting} from "../../bll/counterReducer";
+import {useDispatch} from "react-redux";
 
 type ButtonType = {
     id: number
     title: string
 }
 
-type MainType = {
-    openSettings: boolean
-    setOpenSettings: (openSettings: boolean) => void
-    maxValue: number
-    startValue: number
-    countState: number
-    setCountState: (countState: number) => void
-}
-
-const Main = (props: MainType) => {
+const Main = () => {
+    const {
+        countState,
+        startValue,
+        maxValue,
+        openSettings
+    } = useCounterSelector<CounterStateType>(state => state.counter)
+    const dispatch = useDispatch()
 
     const buttonState: ButtonType[] = [
         {id: 1, title: 'inc'},
@@ -25,24 +26,23 @@ const Main = (props: MainType) => {
     ]
 
 
-
     const onClickCountAddHandler = (buttonId: number) => {
-        buttonId === 1 && props.setCountState(Number(props.countState) + 1)
+        buttonId === 1 && dispatch(changeCurrentCountValue(Number(countState) + 1))
     }
 
     const onClickCountResetHandler = (buttonId: number) => {
-            buttonId === 2 && props.setCountState(props.startValue)
+        buttonId === 2 && dispatch(changeCurrentCountValue((startValue)))
     }
 
     const onClickOpenSettings = (buttonId: number) => {
-        buttonId === 3 && props.setOpenSettings(!props.openSettings)
+        buttonId === 3 && dispatch(toggleSetting((!openSettings)))
     }
 
     const disabledInc = () => {
-        return props.countState === props.maxValue
+        return countState === maxValue
     }
 
-    const settingsClassname = classes.main + (props.openSettings ? ' ' + classes.active : '')
+    const settingsClassname = classes.main + (openSettings ? ' ' + classes.active : '')
 
     const countLimitClassName = classes.counter + (disabledInc() ? ' ' + classes.counterLimit : '')
 
@@ -64,7 +64,7 @@ const Main = (props: MainType) => {
     return (
         <div className={settingsClassname}>
             <div className={classes.topContainer}>
-                <span className={countLimitClassName}>{props.countState}</span>
+                <span className={countLimitClassName}>{countState}</span>
             </div>
             <div className={classes.bottomContainer}>
                 {mappingButton}
